@@ -273,12 +273,17 @@ drop_prefix('', Value) when is_atom(Value) ->
 drop_prefix(Prefix, Value) when is_atom(Prefix), is_atom(Value) ->
     P = atom_to_list(Prefix),
     V = atom_to_list(Value),
-    list_to_atom(lists:sublist(V, length(P) + 1, length(V) - length(P))).
+    case lists:sublist(V, length(P) + 1, length(V) - length(P)) of
+        "." ++ Rest -> list_to_atom(Rest);
+        Rest        -> list_to_atom(Rest)
+    end.
 
 prefix('', V) ->
     V; % fast path (no package)
+prefix(P, '') ->
+    P; % fast path (no remainder)
 prefix(P, V) ->
-    list_to_atom(lists:concat([P, V])).
+    list_to_atom(lists:concat([P, ".", V])).
 
 dict_fetch_or_default(Key, Dict, Default) ->
     case dict:find(Key, Dict) of
